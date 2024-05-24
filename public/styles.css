@@ -1,0 +1,174 @@
+body {
+  font-family: Arial, sans-serif;
+  background-color: #333;
+  margin: 0;
+  padding: 0;
+  line-height: 1.6;
+  color: #fff;
+}
+
+h1, h2 {
+  color: #f9a602;
+}
+
+form {
+  max-width: 600px;
+  margin: 20px auto;
+  padding: 20px;
+  background-color: #444;
+  box-shadow: 0px 0px 20px 0px rgba(0,0,0,0.1);
+}
+
+form label {
+  display: block;
+  margin: 10px 0;
+}
+
+form input[type="text"], form input[type="password"], form input[type="number"] {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 10px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+  background-color: #fff;
+  color: #333;
+}
+
+form button, #logout-button, #declare-winner-button {
+  display: block;
+  width: 100%;
+  padding: 10px;
+  background-color: #f9a602;
+  color: #333;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+form button:hover, #logout-button:hover, #declare-winner-button:hover {
+  background-color: #fff;
+  color: #333;
+}
+
+#portfolio {
+  max-width: 600px;
+  margin: 20px auto;
+  padding: 20px;
+  background-color: #444;
+  box-shadow: 0px 0px 20px 0px rgba(0,0,0,0.1);
+}
+
+.winner-message {
+  font-size: 20px;
+  color: #f9a602;
+  font-weight: bold;
+  margin-top: 10px;
+  border: 2px solid #f9a602;
+  padding: 10px;
+  text-align: center;
+}
+
+#buy-sell-form #get-stock-price-button {
+  background-color: #4CAF50; /* Green */
+  border: none;
+  color: white;
+  padding: 15px 32px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 16px;
+  margin: 4px 2px;
+  cursor: pointer;
+}
+
+#buy-sell-form #get-stock-price-button:hover {
+  background-color: #45a049;
+}
+
+#logout-button {
+  display: block;
+  width: auto;
+  padding: 10px 20px;
+  background-color: #f9a602;
+  color: #333;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+#logout-button:hover {
+  background-color: #fff;
+  color: #333;
+}
+
+#declare-winner-button {
+  display: block;
+  width: auto;
+  padding: 10px 20px;
+  background-color: #f9a602;
+  color: #333;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+#declare-winner-button:hover {
+  background-color: #fff;
+  color: #333;
+}
+
+#search-player-form {
+  margin-top: 20px;
+  margin-bottom: 20px;
+}
+
+#search-player-form label,
+#search-player-form input,
+#search-player-form button {
+  display: block;
+  margin-bottom: 10px;
+}
+
+#player-info {
+  border: 1px solid #f9a602;
+  padding: 10px;
+  margin-bottom: 20px;
+  background-color: #444;
+  color: #fff;
+}
+#portfolio-content {
+  display: flex;
+  justify-content: space-between;
+}
+
+#stocks-info, #purse-info {
+  flex: 1; /* Allow these divs to grow and shrink as needed */
+  padding: 0px;
+  box-sizing: border-box;
+  flex-direction: column; 
+}
+
+#stocks-info {
+  border-right: 1px solid #000; /* Add a border to the right side of the stocks info div */
+  display: flex;
+}
+
+#purse-info {
+  text-align: center; /* Align the text to the right in the purse info div */
+  display: flex; 
+}
+
+.stocks-header, .purse-header {
+  text-align: right !important;
+  margin-bottom: 10px;
+  margin-top: auto;
+  border-bottom: 1px solid #f9a602;
+}
+
+.portfolio-header {
+  text-align: center;
+}

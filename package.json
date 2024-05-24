@@ -1,0 +1,29 @@
+{
+  "name": "project_part2-k4rsh-main-copy",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "directories": {
+    "doc": "doc"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "bcrypt": "^5.1.1",
+    "bcryptjs": "^2.4.3",
+    "chai": "^5.1.0",
+    "jsonwebtoken": "^9.0.2",
+    "mongo": "^0.1.0",
+    "mongodb": "^6.4.0",
+    "mongoose": "^8.2.1",
+    "node": "^21.7.0"
+  },
+  "devDependencies": {
+    "esm": "^3.2.25",
+    "mocha": "^10.3.0"
+  }
+}

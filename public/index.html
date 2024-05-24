@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Stock Trading Game</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://unpkg.com/page/page.js"></script>
+</head>
+<body>
+    <h1>Stock Trading Game</h1>
+ 
+    <div id="register-div">
+    <h2>Register</h2>
+    <form id="register-form">
+        <label for="register-username">Username:</label>
+        <input type="text" id="register-username" name="username">
+        <label for="register-password">Password:</label>
+        <input type="password" id="register-password" name="password">
+        <label for="register-isAdmin">Is Admin:</label>
+        <input type="checkbox" id="register-isAdmin" name="isAdmin">
+        <button type="submit">Register</button>
+    </form>
+    </div>
+
+
+    <div id="login-div">
+    <h2>Login</h2>
+    <form id="login-form">
+        <label for="login-username">Username:</label>
+        <input type="text" id="login-username" name="username">
+        <label for="login-password">Password:</label>
+        <input type="password" id="login-password" name="password">
+        <button type="submit">Login</button>
+    </form>
+    </div>
+
+    <div id="create-game-div">
+        <h2>Create Game</h2>
+        <form id="create-game-form">
+            <label for="player-usernames">Player Usernames:</label>
+            <input type="text" id="player-usernames" placeholder="Enter player usernames separated by commas">
+            <button type="submit">Create Game</button>
+            <button type="button" id="declare-winner-button">Declare Winner</button>
+            <div id="winner-message" class="winner-message" style="display: none;"></div>
+        </form>
+
+        <h2>Search Player</h2>
+        <form id="search-player-form">
+            <label for="search-player-username">Username:</label>
+            <input type="text" id="search-player-username" placeholder="Enter player username">
+            <button type="submit">Search</button>
+        </form>
+        <div id="player-info"></div>
+    </div>
+
+
+    <div id="portfolio">
+        <h2 class="portfolio-header">Portfolio</h2>
+
+        <div id="portfolio-content" style="display: flex; justify-content: space-between;">           
+            
+            <br>
+            <div id="stocks-info">
+                
+            </div>
+            <br>
+
+            <div id="purse-info">
+                
+            </div>
+        </div>
+    </div>
+
+
+    <form id="buy-sell-form" style="display: none;">
+        <h2>Buy/Sell Stocks</h2>
+        <label for="stock-symbol">Stock Symbol:</label>
+        <input type="text" id="stock-symbol" name="symbol">
+        <button type="button" id="get-stock-price-button">Get Stock Price</button>
+        <p id="stock-price"></p>
+        <label for="stock-quantity">Quantity:</label>
+        <input type="number" id="stock-quantity" name="quantity">
+        <button type="submit">Buy</button>
+        <button type="submit">Sell</button>
+    </form>
+
+    <button id="logout-button" style="display: none;">Logout</button>
+
+<script>
+    document.getElementById('register-form').addEventListener('submit', async event => {
+        event.preventDefault();
+        const username = document.getElementById('register-username').value;
+        const password = document.getElementById('register-password').value;
+        const isAdmin = document.getElementById('register-isAdmin').checked;
+        const response = await fetch('/register', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username, password, isAdmin })
+        });
+        const data = await response.json();
+        console.log(data);
+
+        if (response.ok) {
+            alert('Registration successful!');
+            page('/');
+
+        }
+    });
+
+    document.getElementById('login-form').addEventListener('submit', async event => {
+        event.preventDefault();
+        const username = document.getElementById('login-username').value;
+        const password = document.getElementById('login-password').value;
+        const response = await fetch('/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username, password })
+        });
+        const data = await response.json();
+        console.log(data);
+
+        // If the login is successful, redirect to the create game page if the user is an admin, or the portfolio page if the user is a player
+        if (response.ok) {
+            alert('Login successful!');
+            const token = data.token;
+            localStorage.setItem('token', token);
+            console.log(`username: ${username}, token: ${token}`)
+            localStorage.setItem('username', username);
+            console.log(data);
+            if (data.isAdmin) {
+                page('/create-game');
+            } else {
+                page('/portfolio');
+            }
+        }
+    });
+
+    document.getElementById('create-game-form').addEventListener('submit', async event => {
+        event.preventDefault();
+        const playerUsernames = document.getElementById('player-usernames').value.split(',').map(username => username.trim());
+
+        // Retrieve the token from localStorage
+        const token = localStorage.getItem('token');
+
+        const response = await fetch('/games', {
+            method: 'POST',
+            headers: { 
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + token
+            },
+            body: JSON.stringify({ players: playerUsernames })
+        });
+        const data = await response.json();
+        console.log(data);
+
+        // If the game creation is successful, update the portfolio
+        if (response.ok) {
+            alert('Game created successfully!');
+            updatePortfolio();
+            page('/');
+            const gameId = data._id;
+            localStorage.setItem('gameId', gameId);
+        }
+    });
+
+    async function updatePortfolio() {
+        // Get the player username and token from localStorage
+        const username = localStorage.getItem('username');
+        const token = localStorage.getItem('token'); // Retrieve the token from local storage
+
+        // Make a GET request to the /profile route
+        const response = await fetch(`/profile?username=${username}`, {
+            headers: { 'Authorization': 'Bearer ' + token }
+        });
+
+        // Parse the response data
+        const data = await response.json();
+
+        // Get the stocks info and purse info divs
+    const stocksInfoDiv = document.getElementById('stocks-info');
+    const purseInfoDiv = document.getElementById('purse-info');
+
+    // Clear the divs
+    while (stocksInfoDiv.firstChild) {
+        stocksInfoDiv.removeChild(stocksInfoDiv.firstChild);
+    }
+    while (purseInfoDiv.firstChild) {
+        purseInfoDiv.removeChild(purseInfoDiv.firstChild);
+    }
+
+    // Create empty paragraph elements for spacing
+    const stocksEmptyLine = document.createElement('p');
+    stocksEmptyLine.innerHTML = '&nbsp;'; // Non-breaking space
+    stocksInfoDiv.appendChild(stocksEmptyLine);
+
+    const purseEmptyLine = document.createElement('p');
+    purseEmptyLine.innerHTML = '&nbsp;'; // Non-breaking space
+    purseInfoDiv.appendChild(purseEmptyLine);
+
+    // Update the stocks info div with the new data
+    for (const [symbol, quantity] of Object.entries(data.portfolio)) {
+        if (quantity > 0) {
+            const p = document.createElement('p');
+            p.textContent = `Stock: ${symbol}, Quantity: ${quantity}`;
+            stocksEmptyLine.appendChild(p);
+        }
+    }
+
+    // Add the purse value to the purse info div
+    const purseP = document.createElement('p');
+    purseP.textContent = `Purse: ${data.purse}`;
+    purseEmptyLine.appendChild(purseP);
+}
+
+    async function fetchStockPrice(symbol) {
+        const response = await fetch(`/stock-price?symbol=${symbol}`);
+        const data = await response.json();
+        return data.quote;
+    }
+
+    document.getElementById('buy-sell-form').addEventListener('submit', async event => {
+        event.preventDefault();
+        const symbol = document.getElementById('stock-symbol').value;
+        const shares = document.getElementById('stock-quantity').value;
+        const action = event.submitter.textContent.toLowerCase(); // 'buy' or 'sell'
+        const token = localStorage.getItem('token');
+        const gameId = localStorage.getItem('gameId');
+        console.log(`symbol: ${symbol}, quantity: ${shares}, action: ${action}, token: ${token}, gameId: ${gameId}`)
+        const response = await fetch(`/games/${gameId}/${action}`, {
+            method: 'POST',
+            headers: { 
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + token
+            },
+            body: JSON.stringify({ symbol, shares })
+        });
+        const data = await response.json();
+        console.log(data);
+
+        // If the action is successful, update the portfolio
+        if (response.ok) {
+            updatePortfolio();
+        } else {
+            // Display an error message
+            alert(`Error: ${data.message}`);
+        }
+    });
+
+    document.getElementById('logout-button').addEventListener('click', () => {
+        document.getElementById('stock-price').innerHTML = '';
+        // Redirect to home page
+        page('/');
+    });
+
+    document.getElementById('declare-winner-button').addEventListener('click', async () => {
+        const gameId = localStorage.getItem('gameId');
+        const token = localStorage.getItem('token');
+        const response = await fetch(`/games/${gameId}/winner`, {
+            method: 'GET',
+            headers: { 'Authorization': 'Bearer ' + token }
+        });
+        const data = await response.json();
+        console.log(data);
+
+        // Get the winner message div
+        const winnerMessageDiv = document.getElementById('winner-message');
+
+        if (response.ok) {
+        // Check if there is a draw
+        if (data.message === 'There is a draw.') {
+            // Update the text content of the div and show it
+            winnerMessageDiv.textContent = `Draw between: ${data.winners.map(player => player.name).join(', ')}`;
+            alert(`Draw between: ${data.winners.map(player => player.name).join(', ')}`);
+        } else {
+            // Update the text content of the div and show it
+            winnerMessageDiv.textContent = `Winner: ${data.name}`;
+            alert(`Winner: ${data.name}`);
+        }
+        winnerMessageDiv.style.display = 'block';
+        } else {
+            // Update the text content of the div and show it
+            winnerMessageDiv.textContent = `Error: ${data}`;
+            winnerMessageDiv.style.display = 'block';
+        }
+    });
+
+    document.getElementById('get-stock-price-button').addEventListener('click', async () => {
+        const symbol = document.getElementById('stock-symbol').value;
+        const quote = await fetchStockPrice(symbol);
+        let text = '';
+        for (const [key, value] of Object.entries(quote)) {
+            text += `${key}: ${value}<br>`;
+        }
+        document.getElementById('stock-price').innerHTML = text;
+    });
+
+document.getElementById('search-player-form').addEventListener('submit', async event => {
+    event.preventDefault();
+    const username = document.getElementById('search-player-username').value;
+
+    // Retrieve the token from localStorage
+    const token = localStorage.getItem('token');
+
+    // Make a GET request to the /profile route
+    const response = await fetch(`/profile?username=${username}`, {
+        headers: { 'Authorization': 'Bearer ' + token }
+    });
+
+    // Parse the response data
+    const data = await response.json();
+
+    // Handle the response data
+    if (response.ok) {
+        let text = '';
+        for (const [key, value] of Object.entries(data)) {
+            if (key === 'portfolio') {
+                text += `<strong>${key.toUpperCase()}:</strong><ul>`;
+                for (const [stock, quantity] of Object.entries(value)) {
+                    text += `<li>${stock}: ${quantity}</li>`;
+                }
+                text += '</ul>';
+            } else {
+                text += `<strong>${key.toUpperCase()}:</strong> ${value}<br>`;
+            }
+        }
+        document.getElementById('player-info').innerHTML = text;
+    } else {
+        console.log(`Error getting profile for player ${username}: ${data}`);
+    }
+});
+
+    page('/', () => {
+        document.getElementById('register-div').style.display = 'block';
+        document.getElementById('login-div').style.display = 'block';
+        document.getElementById('portfolio').style.display = 'none';
+        document.getElementById('buy-sell-form').style.display = 'none';
+        document.getElementById('create-game-div').style.display = 'none';
+        document.getElementById('logout-button').style.display = 'none';
+    });
+
+    page('/create-game', () => {
+        document.getElementById('register-div').style.display = 'none';
+        document.getElementById('login-div').style.display = 'none';
+        document.getElementById('portfolio').style.display = 'none';
+        document.getElementById('buy-sell-form').style.display = 'none';
+        document.getElementById('create-game-div').style.display = 'block';
+        document.getElementById('logout-button').style.display = 'block';
+    });
+
+    page('/portfolio', async () => {
+        document.getElementById('register-div').style.display = 'none';
+        document.getElementById('login-div').style.display = 'none';
+        document.getElementById('create-game-div').style.display = 'none';
+        document.getElementById('portfolio').style.display = 'block';
+        document.getElementById('buy-sell-form').style.display = 'block';
+        document.getElementById('logout-button').style.display = 'block';
+        await updatePortfolio();
+    });
+
+    page.start();
+</script>
+</body>
+</html>
